@@ -1,5 +1,5 @@
 # NewtonSecantMethod
-
+ 
 **TODO: Add description**
 
 ## Installation
