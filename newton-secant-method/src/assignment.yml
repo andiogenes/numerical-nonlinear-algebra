@@ -5,7 +5,7 @@ domain:
 eps: 0.0001
 step: 1
 
-fun: 'x*x'
+fun: 'x*x*x'
 derivatives:
-  first: '2*x'
-  second: '2'
+  first: '3*x*x'
+  second: '6*x'

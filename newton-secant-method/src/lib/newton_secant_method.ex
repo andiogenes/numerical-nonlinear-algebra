@@ -36,6 +36,32 @@ defmodule NewtonSecantMethod do
     Task.start(fn -> :timer.sleep(1000) end)
   end
 
+  def find_root(xl, xr, f, df, ddf, eps) do
+    xln =
+      cond do
+        f.(xl) * ddf.(xl) < 0 ->
+          xl - f.(xl) * (xl - xr) / (f.(xl) - f.(xr))
+
+        true ->
+          xl - f.(xl) / df.(xl)
+      end
+
+    xrn =
+      cond do
+        f.(xr) * ddf.(xr) < 0 ->
+          xr - f.(xr) * (xr - xl) / (f.(xr) - f.(xl))
+
+        true ->
+          xr - f.(xr) / df.(xl)
+      end
+
+    if abs(xln - xrn) >= eps do
+      find_root(xln, xrn, f, df, ddf, eps)
+    else
+      (xln - xrn) / 2
+    end
+  end
+
   def separate_roots(a, b, step, f, df) do
     seq(a, b, step)
     |> Enum.chunk_every(2, 1, :discard)
