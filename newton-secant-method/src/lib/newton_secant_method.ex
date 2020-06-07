@@ -36,9 +36,15 @@ defmodule NewtonSecantMethod do
     roots =
       roots_intervals
       |> Enum.map(fn [x, y] -> find_root(x, y, f, df, ddf, eps) end)
-      |> Enum.uniq
+      |> Enum.uniq()
 
-    IO.inspect(roots)
+    title = "Roots of #{fun} = 0"
+    header = ["x", "Residual"]
+
+    roots
+    |> Enum.map(fn x -> [x, f.(x)] end)
+    |> TableRex.quick_render!(header, title)
+    |> IO.puts()
 
     Task.start(fn -> :timer.sleep(1000) end)
   end
