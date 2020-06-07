@@ -29,9 +29,11 @@ defmodule NewtonSecantMethod do
     df = fn x -> Code.eval_string(dfun, x: x) |> elem(0) end
     ddf = fn x -> Code.eval_string(ddfun, x: x) |> elem(0) end
 
-    roots_intervals = separate_roots(a, b, step, f, df)
+    roots_intervals =
+      separate_roots(a, b, step, f, df)
+      |> Enum.chunk_every(2, 2, :discard)
 
-    IO.puts(roots_intervals)
+    IO.inspect(roots_intervals)
 
     Task.start(fn -> :timer.sleep(1000) end)
   end
@@ -63,32 +65,37 @@ defmodule NewtonSecantMethod do
   end
 
   def separate_roots(a, b, step, f, df) do
-    seq(a, b, step)
-    |> Enum.chunk_every(2, 1, :discard)
-    |> Enum.map(fn [x, y] ->
-      {fx, fy} = {f.(x), f.(y)}
+    if step < 1/128 do
+      nil
+    else
+      seq(a, b, step)
+      |> Enum.chunk_every(2, 1, :discard)
+      |> Enum.map(fn [x, y] ->
+        {fx, fy} = {f.(x), f.(y)}
 
-      cond do
-        # Знак функции на концах разный => корни есть
-        sign(fx) != sign(fy) ->
-          # на [x,y] монотонная => корень (возможно кратный)
-          if monotonic?(x, y, step / 4, df) do
-            [x, y]
-          else
-            separate_roots(x, y, step / 2, f, df)
-          end
+        cond do
+          # Знак функции на концах разный => корни есть
+          sign(fx) != sign(fy) ->
+            # на [x,y] монотонная => корень (возможно кратный)
+            if monotonic?(x, y, step / 4, df) do
+              [x, y]
+            else
+              separate_roots(x, y, step / 2, f, df)
+            end
 
-        # Знак функции одинаковый => возможно корней нет
-        sign(fx) == sign(fy) ->
-          # Монотонная => корней на отрезке нет
-          if monotonic?(x, y, step / 4, df, true) do
-            nil
-          else
-            separate_roots(x, y, step / 2, f, df)
-          end
-      end
-    end)
-    |> Enum.filter(fn x -> not is_nil(x) end)
+          # Знак функции одинаковый => возможно корней нет
+          sign(fx) == sign(fy) ->
+            # Монотонная => корней на отрезке нет
+            if monotonic?(x, y, step / 4, df, true) do
+              nil
+            else
+              separate_roots(x, y, step / 2, f, df)
+            end
+        end
+      end)
+      |> Enum.filter(fn x -> not is_nil(x) end)
+      |> List.flatten()
+    end
   end
 
   def seq(a, b, step) do
