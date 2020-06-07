@@ -33,7 +33,12 @@ defmodule NewtonSecantMethod do
       separate_roots(a, b, step, f, df)
       |> Enum.chunk_every(2, 2, :discard)
 
-    IO.inspect(roots_intervals)
+    roots =
+      roots_intervals
+      |> Enum.map(fn [x, y] -> find_root(x, y, f, df, ddf, eps) end)
+      |> Enum.uniq
+
+    IO.inspect(roots)
 
     Task.start(fn -> :timer.sleep(1000) end)
   end
@@ -60,12 +65,12 @@ defmodule NewtonSecantMethod do
     if abs(xln - xrn) >= eps do
       find_root(xln, xrn, f, df, ddf, eps)
     else
-      (xln - xrn) / 2
+      (xln + xrn) / 2
     end
   end
 
   def separate_roots(a, b, step, f, df) do
-    if step < 1/128 do
+    if step < 1 / 128 do
       nil
     else
       seq(a, b, step)
