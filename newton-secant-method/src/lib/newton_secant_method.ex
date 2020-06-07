@@ -55,7 +55,7 @@ defmodule NewtonSecantMethod do
         # Знак функции одинаковый => возможно корней нет
         sign(fx) == sign(fy) ->
           # Монотонная => корней на отрезке нет
-          if monotonic?(x, y, step / 4, df) do
+          if monotonic?(x, y, step / 4, df, true) do
             nil
           else
             separate_roots(x, y, step / 2, f, df)
