@@ -31,7 +31,7 @@ defmodule NewtonSecantMethod do
 
     roots_intervals = separate_roots(a, b, step, f, df)
 
-    IO.puts roots_intervals
+    IO.puts(roots_intervals)
 
     Task.start(fn -> :timer.sleep(1000) end)
   end
@@ -70,13 +70,18 @@ defmodule NewtonSecantMethod do
     |> Enum.take_while(fn x -> x <= b end)
   end
 
-  def monotonic?(a, b, step, df) do
-    seq(a, b, step)
-    |> Enum.map(fn x -> sign(df.(x)) end)
-    |> Enum.reduce_while([], fn x, acc ->
-      if x in acc, do: {:halt, 0}, else: {:cont, [x | acc]}
-    end)
-    |> is_list()
+  def monotonic?(a, b, step, df, strict \\ false) do
+    uniques_length =
+      seq(a, b, step)
+      |> Enum.map(fn x -> sign(df.(x)) end)
+      |> Enum.uniq()
+      |> Enum.count()
+
+    if strict do
+      uniques_length == 1
+    else
+      uniques_length <= 2
+    end
   end
 
   def sign(x) do
