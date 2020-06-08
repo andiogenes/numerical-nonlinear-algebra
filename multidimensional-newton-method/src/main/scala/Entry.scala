@@ -1,35 +1,41 @@
-import java.beans.BeanProperty
-import java.io.{File, FileInputStream}
+import com.jakewharton.fliptables.FlipTable
 
-import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.constructor.Constructor
+import scala.io.StdIn.readLine
 
 object Entry extends App {
-  val options = CliParser.parse(args)
+  val approx = readLine("Введите приближение: ")
+    .drop(1)
+    .dropRight(1)
+    .replaceAllLiterally(" ", "")
+    .split(',')
+    .map(v => v.toDouble)
+    .toVector
 
-  val source = options(CliParser.Source).toString
-  val destination = options(CliParser.Destination).toString
+  val eps = readLine("Введите точность: ").toDouble
 
-  /**
-   * Загружает YAML-данные из `filename` в формате `Config`
-   *
-   * @param filename Относительный путь к файлу
-   * @return Объект с загруженными данными
-   */
-  def loadData(filename: String) = {
-    val input = new FileInputStream(new File(filename))
-    val yaml = new Yaml(new Constructor(classOf[Config]))
+  val solution = NewtonMethod.findSolution(approx, eps)
 
-    yaml.load(input).asInstanceOf[Config]
-  }
+  val headers = Array("Решение", "Невязка")
+  val data = Array(
+    Array(
+      Utils.formatVector(solution),
+      Utils.formatVector(Assignment.F
+        .map(f => f(solution))
+        .toDenseVector
+        .toScalaVector)
+    )
+  )
 
-  val config = loadData(source)
-
-  val eps = config.eps
-
-  println(eps)
+  println(FlipTable.of(headers, data))
 }
 
-class Config {
-  @BeanProperty var eps: Double = 0
+object Utils {
+  /**
+   * Конвертирует вектор в строку в формате (x0, x1, ..., xn)
+   *
+   * @param vector Вектор
+   * @return Форматированная строка
+   */
+  def formatVector(vector: Vector[Any]): String =
+    s"(${vector.tail.foldLeft(vector.head.toString) { (x, y) => s"$x, $y" }})"
 }
