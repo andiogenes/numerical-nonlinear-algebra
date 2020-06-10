@@ -1,8 +1,9 @@
 import breeze.linalg.sum
 
 object NewtonMethod {
-  def findSolution(approx: Vector[Double], eps: Double): Vector[Double] = {
+  def findSolution(approx: Vector[Double], eps: Double): (Vector[Double], Int) = {
     var x = approx
+    var iterations = 0
 
     var norm = Double.MaxValue
 
@@ -20,8 +21,10 @@ object NewtonMethod {
           case (v, i) => v + x(i)
         }
         .toVector
+
+      iterations = iterations + 1
     }
 
-    x
+    (x, iterations)
   }
 }

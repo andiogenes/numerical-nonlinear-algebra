@@ -15,14 +15,15 @@ object Entry extends App {
 
   val solution = NewtonMethod.findSolution(approx, eps)
 
-  val headers = Array("Решение", "Невязка")
+  val headers = Array("Решение", "Невязка", "Количество итераций")
   val data = Array(
     Array(
-      Utils.formatVector(solution),
+      Utils.formatVector(solution._1),
       Utils.formatVector(Assignment.F
-        .map(f => f(solution))
+        .map(f => f(solution._1))
         .toDenseVector
-        .toScalaVector)
+        .toScalaVector),
+      solution._2.toString
     )
   )
 
