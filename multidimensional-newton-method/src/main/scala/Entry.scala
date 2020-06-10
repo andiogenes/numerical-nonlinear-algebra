@@ -1,8 +1,14 @@
+import java.io.PrintStream
+
 import com.jakewharton.fliptables.FlipTable
 
 import scala.io.StdIn.readLine
 
 object Entry extends App {
+  if (args.contains("no-warn")) {
+    System.setErr(new PrintStream("/dev/null"))
+  }
+
   val approx = readLine("Введите приближение: ")
     .drop(1)
     .dropRight(1)
